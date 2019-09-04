@@ -13,6 +13,8 @@ import org.onvif.ver10.events.wsdl.GetEventProperties;
 import org.onvif.ver10.events.wsdl.GetEventPropertiesResponse;
 import org.onvif.ver10.media.wsdl.Media;
 import org.onvif.ver10.schema.AudioSource;
+import org.onvif.ver10.schema.AudioSourceConfiguration;
+import org.onvif.ver10.schema.PTZNode;
 import org.onvif.ver10.schema.PTZPreset;
 import org.onvif.ver10.schema.PTZStatus;
 import org.onvif.ver10.schema.Profile;
@@ -100,6 +102,13 @@ public class TestDevice {
       out += "VideoSources: " + th.getMessage() + sep;
     }
     try {
+      List<AudioSourceConfiguration> ac = media.getAudioSourceConfigurations();
+      if (ac != null && ac.size() > 0) {
+        for (AudioSourceConfiguration asc : ac) {
+          out += "audio_configuration: " + OnvifUtils.format(asc) + sep;
+        }
+      }
+
       // This may throw a SoapFaultException with the message "This device does not support audio"
       List<AudioSource> audioSources = media.getAudioSources();
       out += "AudioSources: " + audioSources.size() + sep;
@@ -153,6 +162,29 @@ public class TestDevice {
           out += "\tPresets:" + presets.size() + sep;
           for (PTZPreset p : presets) out += "\t\t" + OnvifUtils.format(p) + sep;
         }
+        try {
+          List<PTZNode> ptz_nodes = ptz.getNodes();
+          out += "\tptz_nodes=" + ptz_nodes != null ? ptz_nodes.size() : "null" + sep;
+          if (ptz_nodes != null) {
+
+            for (PTZNode node : ptz_nodes) {
+              String nodeInfo = OnvifUtils.format(node);
+              nodeInfo = nodeInfo.replace("],", "],\n\t\t\t");
+              out += "\t\t" + nodeInfo;
+              /*
+                            PTZSpaces spaces = node.getSupportedPTZSpaces();
+                            if (spaces != null) {
+                              out += " space=" + OnvifUtils.format(spaces); // node.
+                            }
+              */
+              out += sep;
+            }
+          }
+
+        } catch (Throwable th) {
+
+        }
+
       } catch (Throwable th) {
         out += "PTZ: Unavailable" + th.getMessage() + sep;
       }
@@ -186,7 +218,6 @@ public class TestDevice {
     try {
       // OnvifDevice.setVerbose(true);
       String out = testCamera(creds);
-
       LOG.info("\n" + out + "\n");
     } catch (Throwable th) {
       LOG.error("Failed for " + creds, th);

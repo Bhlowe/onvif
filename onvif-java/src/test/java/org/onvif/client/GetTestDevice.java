@@ -88,7 +88,7 @@ public class GetTestDevice {
 
     InputStream res = GetTestDevice.class.getResourceAsStream(resource);
     if (res != null) {
-      Scanner s = new Scanner(res, StandardCharsets.UTF_8).useDelimiter("\\A");
+      Scanner s = new Scanner(res, StandardCharsets.UTF_8.name()).useDelimiter("\\A");
       while (s.hasNextLine()) {
         String line = s.nextLine();
         if (!line.isEmpty() && !line.startsWith("#"))
